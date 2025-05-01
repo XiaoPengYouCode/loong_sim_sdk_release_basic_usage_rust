@@ -1,0 +1,197 @@
+use byteorder::{LittleEndian, WriteBytesExt};
+use log::error;
+use ndarray::prelude::*;
+use std::io::Error;
+
+pub struct ManiSdkCtrlDataClass {
+    in_charge: i16,
+    filt_level: i16,
+    arm_mode: i16,
+    finger_mode: i16,
+    neck_mode: i16,
+    lumbar_mode: i16,
+    arm_cmd: Array2<f32>,
+    arm_fm: Array2<f32>,
+    finger_left: Array1<f32>,
+    finger_right: Array1<f32>,
+    neck_cmd: Array1<f32>,
+    lumbar_cmd: Array1<f32>,
+    arm_dof: i16,
+    finger_dof_left: i16,
+    finger_dof_right: i16,
+    neck_dof: i16,
+    lumbar_dof: i16,
+}
+
+impl ManiSdkCtrlDataClass {
+    pub fn new(
+        arm_dof: i16,
+        finger_dof_left: i16,
+        finger_dof_right: i16,
+        neck_dof: i16,
+        lumbar_dof: i16,
+    ) -> Self {
+        let arm_cmd = array![
+            [0.4, 0.3, 0.1, 0.0, 0.0, 0.0, 0.5],
+            [0.2, -0.3, 0.1, 0.0, 0.0, 0.0, 0.5]
+        ];
+        if arm_cmd.shape()[1] != (arm_dof as usize) {
+            error!("Invalid arm dof");
+            panic!("Invalid arm dof");
+        }
+        Self {
+            in_charge: 1,
+            filt_level: 2,
+            arm_mode: 0,
+            finger_mode: 0,
+            neck_mode: 0,
+            lumbar_mode: 0,
+            arm_cmd: arm_cmd.clone(),
+            arm_fm: Array2::<f32>::zeros((2, 6).f()),
+            finger_left: Array1::<f32>::zeros(finger_dof_left as usize),
+            finger_right: Array1::<f32>::zeros(finger_dof_right as usize),
+            neck_cmd: Array1::<f32>::zeros(neck_dof as usize),
+            lumbar_cmd: Array1::<f32>::zeros(lumbar_dof as usize),
+            arm_dof,
+            finger_dof_left,
+            finger_dof_right,
+            neck_dof,
+            lumbar_dof,
+        }
+    }
+    pub fn set_in_charge(&mut self, in_charge: i16) -> &mut Self {
+        self.in_charge = in_charge;
+        self
+    }
+    pub fn set_filt_level(&mut self, filt_level: i16) -> &mut Self {
+        self.filt_level = filt_level;
+        self
+    }
+    pub fn set_arm_mode(&mut self, arm_mode: i16) -> &mut Self {
+        self.arm_mode = arm_mode;
+        self
+    }
+    pub fn set_finger_mode(&mut self, finger_mode: i16) -> &mut Self {
+        self.finger_mode = finger_mode;
+        self
+    }
+    pub fn set_neck_mode(&mut self, neck_mode: i16) -> &mut Self {
+        self.neck_mode = neck_mode;
+        self
+    }
+    pub fn set_lumbar_mode(&mut self, lumbar_mode: i16) -> &mut Self {
+        self.lumbar_mode = lumbar_mode;
+        self
+    }
+    pub fn set_arm_cmd(&mut self, arm_cmd: Array2<f32>) -> &mut Self {
+        if arm_cmd.shape()[1] != self.arm_dof as usize {
+            error!("Invalid arm dof");
+            panic!("Invalid arm dof");
+        }
+        self.arm_cmd = arm_cmd.clone();
+        self
+    }
+    pub fn set_arm_fm(&mut self, arm_fm: Array2<f32>) -> &mut Self {
+        self.arm_fm = arm_fm.clone();
+        self
+    }
+    pub fn set_finger_left(&mut self, finger_left: Array1<f32>) -> &mut Self {
+        if finger_left.shape()[0] != self.finger_dof_left as usize {
+            error!("Invalid finger dof");
+            panic!("Invalid finger dof");
+        }
+        self.finger_left = finger_left.clone();
+        self
+    }
+    pub fn set_finger_right(&mut self, finger_right: Array1<f32>) -> &mut Self {
+        if finger_right.shape()[0] != self.finger_dof_right as usize {
+            error!("Invalid finger dof");
+            panic!("Invalid finger dof");
+        }
+        self.finger_right = finger_right.clone();
+        self
+    }
+    pub fn set_neck_cmd(&mut self, neck_cmd: Array1<f32>) -> &mut Self {
+        if neck_cmd.shape()[0] != self.neck_dof as usize {
+            error!("Invalid neck dof");
+            panic!("Invalid neck dof");
+        }
+        self.neck_cmd = neck_cmd.clone();
+        self
+    }
+    pub fn set_lumbar_cmd(&mut self, lumbar_cmd: Array1<f32>) -> &mut Self {
+        if lumbar_cmd.shape()[0] != self.lumbar_dof as usize {
+            error!("Invalid lumbar dof");
+            panic!("Invalid lumbar dof");
+        }
+        self.lumbar_cmd = lumbar_cmd.clone();
+        self
+    }
+}
+
+impl ManiSdkCtrlDataClass {
+    pub fn pack_data(&self) -> Result<Vec<u8>, Error> {
+        let mut buf = Vec::new();
+
+        buf.write_i16::<LittleEndian>(self.in_charge)?;
+        buf.write_i16::<LittleEndian>(self.filt_level)?;
+        buf.write_i16::<LittleEndian>(self.arm_mode)?;
+        buf.write_i16::<LittleEndian>(self.finger_mode)?;
+        buf.write_i16::<LittleEndian>(self.neck_mode)?;
+        buf.write_i16::<LittleEndian>(self.lumbar_mode)?;
+
+        for arm in self.arm_cmd.outer_iter() {
+            for &val in arm.iter() {
+                buf.write_f32::<LittleEndian>(val)?;
+            }
+        }
+
+        for arm in self.arm_fm.outer_iter() {
+            for &val in arm.iter() {
+                buf.write_f32::<LittleEndian>(val)?;
+            }
+        }
+
+        for &val in self.finger_left.iter() {
+            buf.write_f32::<LittleEndian>(val)?;
+        }
+
+        for &val in self.finger_right.iter() {
+            buf.write_f32::<LittleEndian>(val)?;
+        }
+
+        for &val in self.neck_cmd.iter() {
+            buf.write_f32::<LittleEndian>(val)?;
+        }
+
+        for &val in self.lumbar_cmd.iter() {
+            buf.write_f32::<LittleEndian>(val)?;
+        }
+
+        Ok(buf)
+    }
+}
+
+impl std::fmt::Display for ManiSdkCtrlDataClass {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "ManiSdkCtrlDataClass")?;
+        writeln!(f, "in_charge: {}", self.in_charge)?;
+        writeln!(f, "filt_level: {}", self.filt_level)?;
+        writeln!(f, "arm_mode: {}", self.arm_mode)?;
+        writeln!(f, "finger_mode: {}", self.finger_mode)?;
+        writeln!(f, "neck_mode: {}", self.neck_mode)?;
+        writeln!(f, "lumbar_mode: {}", self.lumbar_mode)?;
+        writeln!(f, "arm_cmd: {:?}", self.arm_cmd)?;
+        writeln!(f, "arm_fm: {:?}", self.arm_fm)?;
+        writeln!(f, "finger_left: {:?}", self.finger_left)?;
+        writeln!(f, "finger_right: {:?}", self.finger_right)?;
+        writeln!(f, "neck_cmd: {:?}", self.neck_cmd)?;
+        writeln!(f, "lumbar_cmd: {:?}", self.lumbar_cmd)?;
+        writeln!(f, "arm_dof: {}", self.arm_dof)?;
+        writeln!(f, "finger_dof_left: {}", self.finger_dof_left)?;
+        writeln!(f, "finger_dof_right: {}", self.finger_dof_right)?;
+        writeln!(f, "neck_dof: {}", self.neck_dof)?;
+        writeln!(f, "lumbar_dof: {}", self.lumbar_dof)?;
+        Ok(())
+    }
+}
