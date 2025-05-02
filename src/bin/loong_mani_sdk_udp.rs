@@ -17,7 +17,10 @@ use tracing_subscriber;
 /// data: 2025.04.30
 /// author: XiaoPengYouCode.github.com
 use ndarray::prelude::*;
-use rust_impl::comm::{ManiSdkClass, ctrl::ManiSdkCtrlDataClass};
+use openloong_sdk_basic_usage_example_rust::comm::ManiSdkClass;
+use openloong_sdk_basic_usage_example_rust::comm::ctrl::{
+    ArmMode, FiltLevel, FingerMode, InCharge, LumbarMode, ManiSdkCtrlDataClass, NeckMode,
+};
 
 // const REMOTE_HOST_IP_PORT: &str = "192.168.1.100:8003";
 const CIRCLE_HOST_IP_PORT: &str = "0.0.0.0:8003";
@@ -42,12 +45,12 @@ async fn main() {
         lumbar_dof,
     );
 
-    ctrl.set_in_charge(1)
-        .set_filt_level(1)
-        .set_arm_mode(4)
-        .set_finger_mode(3)
-        .set_neck_mode(5)
-        .set_lumbar_mode(0)
+    ctrl.set_in_charge(InCharge::ManiCtrlEnable)
+        .set_filt_level(FiltLevel::Level1)
+        .set_arm_mode(ArmMode::CartesianBodyFrame)
+        .set_finger_mode(FingerMode::JntAxisCtrl)
+        .set_neck_mode(NeckMode::LookLeftHand)
+        .set_lumbar_mode(LumbarMode::None)
         .set_arm_cmd(array![
             [0.4, 0.4, 0.1, 0.0, 0.0, 0.0, 0.5],
             [0.2, -0.4, 0.1, 0.0, 0.0, 0.0, 0.5]

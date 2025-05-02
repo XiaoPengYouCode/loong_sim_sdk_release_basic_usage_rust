@@ -3,13 +3,74 @@ use log::error;
 use ndarray::prelude::*;
 use std::io::Error;
 
+#[repr(i16)]
+#[derive(Copy, Clone, Debug)]
+pub enum InCharge {
+    ManiCtrlDisable,
+    ManiCtrlEnable,
+}
+
+#[repr(i16)]
+#[derive(Copy, Clone, Debug)]
+pub enum FiltLevel {
+    Level0,
+    Level1,
+    Level2,
+    Level3,
+    Level4,
+    Level5,
+    Disabled,
+}
+
+#[repr(i16)]
+#[derive(Copy, Clone, Debug)]
+pub enum ArmMode {
+    None,
+    Reset,
+    LowerLimbCmdPassthrough,
+    JntAxisCtrl,
+    CartesianBodyFrame,
+}
+
+#[repr(i16)]
+#[derive(Copy, Clone, Debug)]
+pub enum FingerMode {
+    None,
+    Reset,
+    LowerLimbCmdPassthrough,
+    JntAxisCtrl,
+    Extend, // 伸直
+}
+
+#[repr(i16)]
+#[derive(Copy, Clone, Debug)]
+pub enum NeckMode {
+    None,
+    Reset,
+    LowerLimbCmdPassthrough,
+    JntAxisCtrl,
+    NavigationFollow,
+    LookLeftHand,
+    LookRightHand,
+}
+
+#[repr(i16)]
+#[derive(Copy, Clone, Debug)]
+pub enum LumbarMode {
+    None,
+    Reset,
+    LowerLimbCmdPassthrough,
+    JntAxisCtrl,
+    PostCtrl,
+}
+
 pub struct ManiSdkCtrlDataClass {
-    in_charge: i16,
-    filt_level: i16,
-    arm_mode: i16,
-    finger_mode: i16,
-    neck_mode: i16,
-    lumbar_mode: i16,
+    in_charge: InCharge,
+    filt_level: FiltLevel,
+    arm_mode: ArmMode,
+    finger_mode: FingerMode,
+    neck_mode: NeckMode,
+    lumbar_mode: LumbarMode,
     arm_cmd: Array2<f32>,
     arm_fm: Array2<f32>,
     finger_left: Array1<f32>,
@@ -40,12 +101,12 @@ impl ManiSdkCtrlDataClass {
             panic!("Invalid arm dof");
         }
         Self {
-            in_charge: 1,
-            filt_level: 2,
-            arm_mode: 0,
-            finger_mode: 0,
-            neck_mode: 0,
-            lumbar_mode: 0,
+            in_charge: InCharge::ManiCtrlEnable,
+            filt_level: FiltLevel::Level2,
+            arm_mode: ArmMode::None,
+            finger_mode: FingerMode::None,
+            neck_mode: NeckMode::LookLeftHand,
+            lumbar_mode: LumbarMode::None,
             arm_cmd: arm_cmd.clone(),
             arm_fm: Array2::<f32>::zeros((2, 6).f()),
             finger_left: Array1::<f32>::zeros(finger_dof_left as usize),
@@ -59,27 +120,27 @@ impl ManiSdkCtrlDataClass {
             lumbar_dof,
         }
     }
-    pub fn set_in_charge(&mut self, in_charge: i16) -> &mut Self {
+    pub fn set_in_charge(&mut self, in_charge: InCharge) -> &mut Self {
         self.in_charge = in_charge;
         self
     }
-    pub fn set_filt_level(&mut self, filt_level: i16) -> &mut Self {
+    pub fn set_filt_level(&mut self, filt_level: FiltLevel) -> &mut Self {
         self.filt_level = filt_level;
         self
     }
-    pub fn set_arm_mode(&mut self, arm_mode: i16) -> &mut Self {
+    pub fn set_arm_mode(&mut self, arm_mode: ArmMode) -> &mut Self {
         self.arm_mode = arm_mode;
         self
     }
-    pub fn set_finger_mode(&mut self, finger_mode: i16) -> &mut Self {
+    pub fn set_finger_mode(&mut self, finger_mode: FingerMode) -> &mut Self {
         self.finger_mode = finger_mode;
         self
     }
-    pub fn set_neck_mode(&mut self, neck_mode: i16) -> &mut Self {
+    pub fn set_neck_mode(&mut self, neck_mode: NeckMode) -> &mut Self {
         self.neck_mode = neck_mode;
         self
     }
-    pub fn set_lumbar_mode(&mut self, lumbar_mode: i16) -> &mut Self {
+    pub fn set_lumbar_mode(&mut self, lumbar_mode: LumbarMode) -> &mut Self {
         self.lumbar_mode = lumbar_mode;
         self
     }
@@ -133,12 +194,12 @@ impl ManiSdkCtrlDataClass {
     pub fn pack_data(&self) -> Result<Vec<u8>, Error> {
         let mut buf = Vec::new();
 
-        buf.write_i16::<LittleEndian>(self.in_charge)?;
-        buf.write_i16::<LittleEndian>(self.filt_level)?;
-        buf.write_i16::<LittleEndian>(self.arm_mode)?;
-        buf.write_i16::<LittleEndian>(self.finger_mode)?;
-        buf.write_i16::<LittleEndian>(self.neck_mode)?;
-        buf.write_i16::<LittleEndian>(self.lumbar_mode)?;
+        buf.write_i16::<LittleEndian>(self.in_charge as i16)?;
+        buf.write_i16::<LittleEndian>(self.filt_level as i16)?;
+        buf.write_i16::<LittleEndian>(self.arm_mode as i16)?;
+        buf.write_i16::<LittleEndian>(self.finger_mode as i16)?;
+        buf.write_i16::<LittleEndian>(self.neck_mode as i16)?;
+        buf.write_i16::<LittleEndian>(self.lumbar_mode as i16)?;
 
         for arm in self.arm_cmd.outer_iter() {
             for &val in arm.iter() {
@@ -175,12 +236,12 @@ impl ManiSdkCtrlDataClass {
 impl std::fmt::Display for ManiSdkCtrlDataClass {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "ManiSdkCtrlDataClass")?;
-        writeln!(f, "in_charge: {}", self.in_charge)?;
-        writeln!(f, "filt_level: {}", self.filt_level)?;
-        writeln!(f, "arm_mode: {}", self.arm_mode)?;
-        writeln!(f, "finger_mode: {}", self.finger_mode)?;
-        writeln!(f, "neck_mode: {}", self.neck_mode)?;
-        writeln!(f, "lumbar_mode: {}", self.lumbar_mode)?;
+        writeln!(f, "in_charge: {:?}", self.in_charge)?;
+        writeln!(f, "filt_level: {:?}", self.filt_level)?;
+        writeln!(f, "arm_mode: {:?}", self.arm_mode)?;
+        writeln!(f, "finger_mode: {:?}", self.finger_mode)?;
+        writeln!(f, "neck_mode: {:?}", self.neck_mode)?;
+        writeln!(f, "lumbar_mode: {:?}", self.lumbar_mode)?;
         writeln!(f, "arm_cmd: {:?}", self.arm_cmd)?;
         writeln!(f, "arm_fm: {:?}", self.arm_fm)?;
         writeln!(f, "finger_left: {:?}", self.finger_left)?;
