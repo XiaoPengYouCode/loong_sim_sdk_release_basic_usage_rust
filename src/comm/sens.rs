@@ -6,7 +6,7 @@ use byteorder::{LittleEndian, ReadBytesExt};
 use ndarray::Array1;
 
 #[derive(Debug)]
-pub struct ManiSdkSensDataClass {
+pub struct ManiSdkSensData {
     pub data_size: i32,
     pub timestamp: f64,
     pub key: [i16; 2],
@@ -43,9 +43,9 @@ pub struct ManiSdkSensDataClass {
     fmt_sizes: Vec<usize>,
 }
 
-impl ManiSdkSensDataClass {
+impl ManiSdkSensData {
     pub fn new(jnt_num: usize, finger_dof_left: usize, finger_dof_right: usize) -> Self {
-        ManiSdkSensDataClass {
+        ManiSdkSensData {
             data_size: 0,
             timestamp: 0.0,
             key: [0i16; 2],
@@ -369,7 +369,7 @@ impl ManiSdkSensDataClass {
     }
 }
 
-impl fmt::Display for ManiSdkSensDataClass {
+impl fmt::Display for ManiSdkSensData {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "mani_sdk_sens_data:")?;
         writeln!(f, "data_size = {:?}", self.data_size)?;

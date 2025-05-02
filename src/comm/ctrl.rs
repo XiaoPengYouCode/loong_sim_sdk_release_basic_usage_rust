@@ -64,7 +64,7 @@ pub enum LumbarMode {
     PostCtrl,
 }
 
-pub struct ManiSdkCtrlDataClass {
+pub struct ManiSdkCtrlData {
     in_charge: InCharge,
     filt_level: FiltLevel,
     arm_mode: ArmMode,
@@ -84,7 +84,7 @@ pub struct ManiSdkCtrlDataClass {
     lumbar_dof: i16,
 }
 
-impl ManiSdkCtrlDataClass {
+impl ManiSdkCtrlData {
     pub fn new(
         arm_dof: i16,
         finger_dof_left: i16,
@@ -190,7 +190,7 @@ impl ManiSdkCtrlDataClass {
     }
 }
 
-impl ManiSdkCtrlDataClass {
+impl ManiSdkCtrlData {
     pub fn pack_data(&self) -> Result<Vec<u8>, Error> {
         let mut buf = Vec::new();
 
@@ -233,7 +233,7 @@ impl ManiSdkCtrlDataClass {
     }
 }
 
-impl std::fmt::Display for ManiSdkCtrlDataClass {
+impl std::fmt::Display for ManiSdkCtrlData {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "ManiSdkCtrlDataClass")?;
         writeln!(f, "in_charge: {:?}", self.in_charge)?;

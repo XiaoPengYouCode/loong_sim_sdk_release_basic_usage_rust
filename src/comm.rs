@@ -6,21 +6,21 @@ use std::{io::Error, net::UdpSocket};
 
 use tracing::{error, info};
 
-use self::ctrl::ManiSdkCtrlDataClass;
-use self::sens::ManiSdkSensDataClass;
+use self::ctrl::ManiSdkCtrlData;
+use self::sens::ManiSdkSensData;
 
-pub struct ManiSdkClass {
+pub struct ManiSdk {
     socket: UdpSocket,
-    sens: ManiSdkSensDataClass,
+    sens: ManiSdkSensData,
 }
 
-impl ManiSdkClass {
+impl ManiSdk {
     pub fn new(jnt_num: i32, finger_dof_left: i16, finger_dof_right: i16) -> Self {
         let socket =
             init_mani_socket("0.0.0.0:0".parse().unwrap()).expect("Failed to initialize socket");
         Self {
             socket,
-            sens: ManiSdkSensDataClass::new(
+            sens: ManiSdkSensData::new(
                 jnt_num as usize,
                 finger_dof_left as usize,
                 finger_dof_right as usize,
@@ -28,17 +28,13 @@ impl ManiSdkClass {
         }
     }
 
-    pub fn sens(&self) -> &ManiSdkSensDataClass {
+    pub fn sens(&self) -> &ManiSdkSensData {
         &self.sens
     }
 }
 
-impl ManiSdkClass {
-    pub fn send(
-        &self,
-        ctrl: &ManiSdkCtrlDataClass,
-        target_addr: SocketAddrV4,
-    ) -> Result<(), Error> {
+impl ManiSdk {
+    pub fn send(&self, ctrl: &ManiSdkCtrlData, target_addr: SocketAddrV4) -> Result<(), Error> {
         let data = ctrl.pack_data().unwrap();
         self.socket.send_to(&data, target_addr)?;
         Ok(())

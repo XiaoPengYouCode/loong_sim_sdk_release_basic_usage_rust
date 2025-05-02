@@ -17,9 +17,9 @@ use tracing_subscriber;
 /// data: 2025.04.30
 /// author: XiaoPengYouCode.github.com
 use ndarray::prelude::*;
-use openloong_sdk_basic_usage_example_rust::comm::ManiSdkClass;
+use openloong_sdk_basic_usage_example_rust::comm::ManiSdk;
 use openloong_sdk_basic_usage_example_rust::comm::ctrl::{
-    ArmMode, FiltLevel, FingerMode, InCharge, LumbarMode, ManiSdkCtrlDataClass, NeckMode,
+    ArmMode, FiltLevel, FingerMode, InCharge, LumbarMode, ManiSdkCtrlData, NeckMode,
 };
 
 // const REMOTE_HOST_IP_PORT: &str = "192.168.1.100:8003";
@@ -37,7 +37,7 @@ async fn main() {
     let neck_dof = 2;
     let lumbar_dof = 3;
 
-    let mut ctrl = ManiSdkCtrlDataClass::new(
+    let mut ctrl = ManiSdkCtrlData::new(
         arm_dof,
         finger_dof_left,
         finger_dof_right,
@@ -62,7 +62,7 @@ async fn main() {
         .set_lumbar_cmd(Array1::zeros(3));
 
     let ip_port = CIRCLE_HOST_IP_PORT.parse::<SocketAddrV4>().unwrap();
-    let mut sdk = ManiSdkClass::new(jnt_num, finger_dof_left, finger_dof_right);
+    let mut sdk = ManiSdk::new(jnt_num, finger_dof_left, finger_dof_right);
 
     let dt = 0.02;
 
