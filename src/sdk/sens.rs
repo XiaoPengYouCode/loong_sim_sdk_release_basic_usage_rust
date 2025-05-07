@@ -164,11 +164,9 @@ impl SensData {
         let timestamp = cursor.read_f64::<LittleEndian>()?;
         self.timestamp = timestamp;
 
-        let mut key = [0; 2];
-        for i in 0..2 {
-            key[i] = cursor.read_i16::<LittleEndian>()?;
+        for k in &mut self.key {
+            *k = cursor.read_i16::<LittleEndian>()?;
         }
-        self.key = key;
 
         // 2. 解析 plan_name (固定 16 字节)
         let mut plan_name_buf = [0; 16];
@@ -179,140 +177,130 @@ impl SensData {
         self.plan_name = plan_name;
 
         // 解析 state
-        let mut state = [0; 2];
-        for i in 0..2 {
-            state[i] = cursor.read_i16::<LittleEndian>()?;
+        for i in &mut self.state {
+            *i = cursor.read_i16::<LittleEndian>()?;
         }
-        self.state = state;
 
-        // 3. 解析数组类型字段 (示例: joy[4])
-        let mut joy = [0.0; 4];
-        for i in 0..4 {
-            joy[i] = cursor.read_f32::<LittleEndian>()?;
+        // 3. 解析joy[4]
+        for i in &mut self.joy {
+            *i = cursor.read_f32::<LittleEndian>()?;
         }
-        self.joy = joy;
 
         // 4. 解析 rpy
-        let mut rpy = [0.0; 3];
-        for i in 0..3 {
-            rpy[i] = cursor.read_f32::<LittleEndian>()?;
+        for i in &mut self.rpy {
+            *i = cursor.read_f32::<LittleEndian>()?;
         }
-        self.rpy = rpy;
 
         // 5. 解析 gyr
-        let mut gyr = [0.0; 3];
-        for i in 0..3 {
-            gyr[i] = cursor.read_f32::<LittleEndian>()?;
+        for i in &mut self.gyr {
+            *i = cursor.read_f32::<LittleEndian>()?;
         }
-        self.gyr = gyr;
 
         // 6. 解析 acc
-        let mut acc = [0.0; 3];
-        for i in 0..3 {
-            acc[i] = cursor.read_f32::<LittleEndian>()?;
+        for i in &mut self.acc {
+            *i = cursor.read_f32::<LittleEndian>()?;
         }
-        self.acc = acc;
 
         // 7. 解析 act_j
         let mut act_j = [0.0; 6];
-        for i in 0..6 {
-            act_j[i] = cursor.read_f32::<LittleEndian>()?;
+        for i in &mut act_j {
+            *i = cursor.read_f32::<LittleEndian>()?;
         }
         let act_j = Array1::from_iter(act_j.into_iter());
         self.act_j = act_j;
 
         // 8. 解析 act_w
         let mut act_w = [0.0; 6];
-        for i in 0..6 {
-            act_w[i] = cursor.read_f32::<LittleEndian>()?;
+        for i in &mut act_w {
+            *i = cursor.read_f32::<LittleEndian>()?;
         }
         let act_w = Array1::from_iter(act_w.into_iter());
         self.act_w = act_w;
 
         // 9. 解析 act_t
         let mut act_t = [0.0; 6];
-        for i in 0..6 {
-            act_t[i] = cursor.read_f32::<LittleEndian>()?;
+        for i in &mut act_t {
+            *i = cursor.read_f32::<LittleEndian>()?;
         }
         let act_t = Array1::from_iter(act_t.into_iter());
         self.act_t = act_t;
 
         // 10. 解析 drv_temp
         let mut drv_temp = [0; 6];
-        for i in 0..6 {
-            drv_temp[i] = cursor.read_i16::<LittleEndian>()?;
+        for i in &mut drv_temp {
+            *i = cursor.read_i16::<LittleEndian>()?;
         }
         let drv_temp = Array1::from_iter(drv_temp.into_iter());
         self.drv_temp = drv_temp;
 
         // 11. 解析 drv_state
         let mut drv_state = [0; 6];
-        for i in 0..6 {
-            drv_state[i] = cursor.read_i16::<LittleEndian>()?;
+        for i in &mut drv_state {
+            *i = cursor.read_i16::<LittleEndian>()?;
         }
         let drv_state = Array1::from_iter(drv_state.into_iter());
         self.drv_state = drv_state;
 
         // 12. 解析 drv_err
         let mut drv_err = [0; 6];
-        for i in 0..6 {
-            drv_err[i] = cursor.read_i16::<LittleEndian>()?;
+        for i in &mut drv_err {
+            *i = cursor.read_i16::<LittleEndian>()?;
         }
         let drv_err = Array1::from_iter(drv_err.into_iter());
         self.drv_err = drv_err;
 
         // 13. 解析 tgt_j
         let mut tgt_j = [0.0; 6];
-        for i in 0..6 {
-            tgt_j[i] = cursor.read_f32::<LittleEndian>()?;
+        for i in &mut tgt_j {
+            *i = cursor.read_f32::<LittleEndian>()?;
         }
         let tgt_j = Array1::from_iter(tgt_j.into_iter());
         self.tgt_j = tgt_j;
 
         // 14. 解析 tgt_w
         let mut tgt_w = [0.0; 6];
-        for i in 0..6 {
-            tgt_w[i] = cursor.read_f32::<LittleEndian>()?;
+        for i in &mut tgt_w {
+            *i = cursor.read_f32::<LittleEndian>()?;
         }
         let tgt_w = Array1::from_iter(tgt_w.into_iter());
         self.tgt_w = tgt_w;
 
         // 15. 解析 tgt_t
         let mut tgt_t = [0.0; 6];
-        for i in 0..6 {
-            tgt_t[i] = cursor.read_f32::<LittleEndian>()?;
+        for i in &mut tgt_t {
+            *i = cursor.read_f32::<LittleEndian>()?;
         }
         let tgt_t = Array1::from_iter(tgt_t.into_iter());
         self.tgt_t = tgt_t;
 
         //解析 act_finger_left
         let mut act_finger_left = [0.0; 6];
-        for i in 0..6 {
-            act_finger_left[i] = cursor.read_f32::<LittleEndian>()?;
+        for i in &mut act_finger_left {
+            *i = cursor.read_f32::<LittleEndian>()?;
         }
         let act_finger_left = Array1::from_iter(act_finger_left.into_iter());
         self.act_finger_left = act_finger_left;
 
         //解析 act_finger_right
         let mut act_finger_right = [0.0; 6];
-        for i in 0..6 {
-            act_finger_right[i] = cursor.read_f32::<LittleEndian>()?;
+        for i in &mut act_finger_right {
+            *i = cursor.read_f32::<LittleEndian>()?;
         }
         let act_finger_right = Array1::from_iter(act_finger_right.into_iter());
         self.act_finger_right = act_finger_right;
 
         // 解析tgt_finger_left
         let mut tgt_finger_left = [0.0; 6];
-        for i in 0..6 {
-            tgt_finger_left[i] = cursor.read_f32::<LittleEndian>()?;
+        for i in &mut tgt_finger_left {
+            *i = cursor.read_f32::<LittleEndian>()?;
         }
         let tgt_finger_left = Array1::from_iter(tgt_finger_left.into_iter());
         self.tgt_finger_left = tgt_finger_left;
 
         // 解析tgt_finger_right
         let mut tgt_finger_right = [0.0; 6];
-        for i in 0..6 {
-            tgt_finger_right[i] = cursor.read_f32::<LittleEndian>()?;
+        for i in &mut tgt_finger_right {
+            *i = cursor.read_f32::<LittleEndian>()?;
         }
         let tgt_finger_right = Array1::from_iter(tgt_finger_right.into_iter());
         self.tgt_finger_right = tgt_finger_right;
