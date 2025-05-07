@@ -3,6 +3,10 @@ use log::error;
 use ndarray::prelude::*;
 use std::io::Error;
 
+use crate::loong_robot_param::{
+    LOONG_ARM_DOF, LOONG_FINGER_DOF_LEFT, LOONG_FINGER_DOF_RIGHT, LOONG_LUMBAR_DOF, LOONG_NECK_DOF,
+};
+
 #[repr(i16)]
 #[derive(Copy, Clone, Debug)]
 pub enum InCharge {
@@ -64,14 +68,14 @@ pub enum LumbarMode {
     PostCtrl,
 }
 
-pub struct ManiSdkCtrlData {
+pub struct CtrlData {
     in_charge: InCharge,
     filt_level: FiltLevel,
     arm_mode: ArmMode,
     finger_mode: FingerMode,
     neck_mode: NeckMode,
     lumbar_mode: LumbarMode,
-    arm_cmd: Array2<f32>,
+    pub arm_cmd: Array2<f32>,
     arm_fm: Array2<f32>,
     finger_left: Array1<f32>,
     finger_right: Array1<f32>,
@@ -84,7 +88,7 @@ pub struct ManiSdkCtrlData {
     lumbar_dof: i16,
 }
 
-impl ManiSdkCtrlData {
+impl CtrlData {
     pub fn new(
         arm_dof: i16,
         finger_dof_left: i16,
@@ -119,6 +123,32 @@ impl ManiSdkCtrlData {
             neck_dof,
             lumbar_dof,
         }
+    }
+    pub fn default_loong_ctrl_data() -> Self {
+        let mut default_loong_ctrl_data = Self::new(
+            LOONG_ARM_DOF,
+            LOONG_FINGER_DOF_LEFT,
+            LOONG_FINGER_DOF_RIGHT,
+            LOONG_NECK_DOF,
+            LOONG_LUMBAR_DOF,
+        );
+        default_loong_ctrl_data
+            .set_in_charge(InCharge::ManiCtrlEnable)
+            .set_filt_level(FiltLevel::Level1)
+            .set_arm_mode(ArmMode::CartesianBodyFrame)
+            .set_finger_mode(FingerMode::JntAxisCtrl)
+            .set_neck_mode(NeckMode::LookLeftHand)
+            .set_lumbar_mode(LumbarMode::None)
+            .set_arm_cmd(array![
+                [0.4, 0.4, 0.1, 0.0, 0.0, 0.0, 0.5],
+                [0.2, -0.4, 0.1, 0.0, 0.0, 0.0, 0.5]
+            ])
+            .set_arm_fm(Array2::zeros((2, 6)))
+            .set_finger_left(Array1::zeros(LOONG_FINGER_DOF_LEFT as usize))
+            .set_finger_right(Array1::zeros(LOONG_FINGER_DOF_RIGHT as usize))
+            .set_neck_cmd(Array1::zeros(2))
+            .set_lumbar_cmd(Array1::zeros(3));
+        default_loong_ctrl_data
     }
     pub fn set_in_charge(&mut self, in_charge: InCharge) -> &mut Self {
         self.in_charge = in_charge;
@@ -190,7 +220,7 @@ impl ManiSdkCtrlData {
     }
 }
 
-impl ManiSdkCtrlData {
+impl CtrlData {
     pub fn pack_data(&self) -> Result<Vec<u8>, Error> {
         let mut buf = Vec::new();
 
@@ -233,9 +263,9 @@ impl ManiSdkCtrlData {
     }
 }
 
-impl std::fmt::Display for ManiSdkCtrlData {
+impl std::fmt::Display for CtrlData {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "ManiSdkCtrlDataClass")?;
+        writeln!(f, "ManiSdkCtrlData")?;
         writeln!(f, "in_charge: {:?}", self.in_charge)?;
         writeln!(f, "filt_level: {:?}", self.filt_level)?;
         writeln!(f, "arm_mode: {:?}", self.arm_mode)?;

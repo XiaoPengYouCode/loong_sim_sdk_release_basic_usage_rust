@@ -5,8 +5,10 @@ use std::mem::size_of;
 use byteorder::{LittleEndian, ReadBytesExt};
 use ndarray::Array1;
 
+use crate::loong_robot_param::{LOONG_FINGER_DOF_LEFT, LOONG_FINGER_DOF_RIGHT, LOONG_JNT_NUM};
+
 #[derive(Debug)]
-pub struct ManiSdkSensData {
+pub struct SensData {
     pub data_size: i32,
     pub timestamp: f64,
     pub key: [i16; 2],
@@ -43,9 +45,9 @@ pub struct ManiSdkSensData {
     fmt_sizes: Vec<usize>,
 }
 
-impl ManiSdkSensData {
-    pub fn new(jnt_num: usize, finger_dof_left: usize, finger_dof_right: usize) -> Self {
-        ManiSdkSensData {
+impl SensData {
+    pub fn new(jnt_num: i16, finger_dof_left: i16, finger_dof_right: i16) -> Self {
+        SensData {
             data_size: 0,
             timestamp: 0.0,
             key: [0i16; 2],
@@ -56,20 +58,20 @@ impl ManiSdkSensData {
             rpy: [0.0; 3],
             gyr: [0.0; 3],
             acc: [0.0; 3],
-            act_j: Array1::<f32>::zeros(jnt_num),
-            act_w: Array1::<f32>::zeros(jnt_num),
-            act_t: Array1::<f32>::zeros(jnt_num),
-            drv_temp: Array1::<i16>::zeros(jnt_num),
-            drv_state: Array1::<i16>::zeros(jnt_num),
-            drv_err: Array1::<i16>::zeros(jnt_num),
-            tgt_j: Array1::<f32>::zeros(jnt_num),
-            tgt_w: Array1::<f32>::zeros(jnt_num),
-            tgt_t: Array1::<f32>::zeros(jnt_num),
+            act_j: Array1::<f32>::zeros(jnt_num as usize),
+            act_w: Array1::<f32>::zeros(jnt_num as usize),
+            act_t: Array1::<f32>::zeros(jnt_num as usize),
+            drv_temp: Array1::<i16>::zeros(jnt_num as usize),
+            drv_state: Array1::<i16>::zeros(jnt_num as usize),
+            drv_err: Array1::<i16>::zeros(jnt_num as usize),
+            tgt_j: Array1::<f32>::zeros(jnt_num as usize),
+            tgt_w: Array1::<f32>::zeros(jnt_num as usize),
+            tgt_t: Array1::<f32>::zeros(jnt_num as usize),
 
-            act_finger_left: Array1::<f32>::zeros(finger_dof_left),
-            act_finger_right: Array1::<f32>::zeros(finger_dof_right),
-            tgt_finger_left: Array1::<f32>::zeros(finger_dof_left),
-            tgt_finger_right: Array1::<f32>::zeros(finger_dof_right),
+            act_finger_left: Array1::<f32>::zeros(finger_dof_left as usize),
+            act_finger_right: Array1::<f32>::zeros(finger_dof_right as usize),
+            tgt_finger_left: Array1::<f32>::zeros(finger_dof_left as usize),
+            tgt_finger_right: Array1::<f32>::zeros(finger_dof_right as usize),
 
             act_tip_p_rpy2b: [[0.0; 6]; 2],
             act_tip_vw2b: [[0.0; 6]; 2],
@@ -118,19 +120,19 @@ impl ManiSdkSensData {
                 3 * size_of::<f32>(),
                 3 * size_of::<f32>(),
                 3 * size_of::<f32>(),
-                jnt_num * size_of::<f32>(),
-                jnt_num * size_of::<f32>(),
-                jnt_num * size_of::<f32>(),
-                jnt_num * size_of::<i16>(),
-                jnt_num * size_of::<i16>(),
-                jnt_num * size_of::<i16>(),
-                jnt_num * size_of::<f32>(),
-                jnt_num * size_of::<f32>(),
-                jnt_num * size_of::<f32>(),
-                finger_dof_left * size_of::<f32>(),
-                finger_dof_right * size_of::<f32>(),
-                finger_dof_left * size_of::<f32>(),
-                finger_dof_right * size_of::<f32>(),
+                jnt_num as usize * size_of::<f32>(),
+                jnt_num as usize * size_of::<f32>(),
+                jnt_num as usize * size_of::<f32>(),
+                jnt_num as usize * size_of::<i16>(),
+                jnt_num as usize * size_of::<i16>(),
+                jnt_num as usize * size_of::<i16>(),
+                jnt_num as usize * size_of::<f32>(),
+                jnt_num as usize * size_of::<f32>(),
+                jnt_num as usize * size_of::<f32>(),
+                finger_dof_left as usize * size_of::<f32>(),
+                finger_dof_right as usize * size_of::<f32>(),
+                finger_dof_left as usize * size_of::<f32>(),
+                finger_dof_right as usize * size_of::<f32>(),
                 12 * size_of::<f32>(),
                 12 * size_of::<f32>(),
                 12 * size_of::<f32>(),
@@ -139,6 +141,10 @@ impl ManiSdkSensData {
                 12 * size_of::<f32>(),
             ],
         }
+    }
+
+    pub fn loong_sens_data_default() -> SensData {
+        SensData::new(LOONG_JNT_NUM, LOONG_FINGER_DOF_LEFT, LOONG_FINGER_DOF_RIGHT)
     }
 
     pub fn get_fmt(&self) -> Vec<String> {
@@ -369,9 +375,9 @@ impl ManiSdkSensData {
     }
 }
 
-impl fmt::Display for ManiSdkSensData {
+impl fmt::Display for SensData {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "mani_sdk_sens_data:")?;
+        writeln!(f, "ManiSdkSensData:")?;
         writeln!(f, "data_size = {:?}", self.data_size)?;
         writeln!(f, "timestamp = {:?}", self.timestamp)?;
         writeln!(f, "key = {:?}", self.key)?;

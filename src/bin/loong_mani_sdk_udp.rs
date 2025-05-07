@@ -9,7 +9,6 @@
 // 调用 mani sdk udp，接口定义见之
 // ======================================================
 
-use std::net::SocketAddrV4;
 use tokio::time::{Duration, interval};
 use tracing::{Level, info};
 use tracing_subscriber;
@@ -17,62 +16,26 @@ use tracing_subscriber;
 /// data: 2025.04.30
 /// author: XiaoPengYouCode.github.com
 use ndarray::prelude::*;
-use openloong_sdk_basic_usage_example_rust::comm::ManiSdk;
-use openloong_sdk_basic_usage_example_rust::comm::ctrl::{
-    ArmMode, FiltLevel, FingerMode, InCharge, LumbarMode, ManiSdkCtrlData, NeckMode,
+use openloong_sdk_basic_usage_example_rust::{
+    loong_robot_param::{LOONG_FINGER_DOF_LEFT, LOONG_FINGER_DOF_RIGHT},
+    sdk::LoongManiSdk,
 };
-
-// const REMOTE_HOST_IP_PORT: &str = "192.168.1.100:8003";
-const CIRCLE_HOST_IP_PORT: &str = "0.0.0.0:8003";
 
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt()
         .with_max_level(Level::DEBUG)
         .init();
-    let jnt_num = 19;
-    let arm_dof = 7;
-    let finger_dof_left = 6;
-    let finger_dof_right = 6;
-    let neck_dof = 2;
-    let lumbar_dof = 3;
-
-    let mut ctrl = ManiSdkCtrlData::new(
-        arm_dof,
-        finger_dof_left,
-        finger_dof_right,
-        neck_dof,
-        lumbar_dof,
-    );
-
-    ctrl.set_in_charge(InCharge::ManiCtrlEnable)
-        .set_filt_level(FiltLevel::Level1)
-        .set_arm_mode(ArmMode::CartesianBodyFrame)
-        .set_finger_mode(FingerMode::JntAxisCtrl)
-        .set_neck_mode(NeckMode::LookLeftHand)
-        .set_lumbar_mode(LumbarMode::None)
-        .set_arm_cmd(array![
-            [0.4, 0.4, 0.1, 0.0, 0.0, 0.0, 0.5],
-            [0.2, -0.4, 0.1, 0.0, 0.0, 0.0, 0.5]
-        ])
-        .set_arm_fm(Array2::zeros((2, 6)))
-        .set_finger_left(Array1::zeros(finger_dof_left as usize))
-        .set_finger_right(Array1::zeros(finger_dof_right as usize))
-        .set_neck_cmd(Array1::zeros(2))
-        .set_lumbar_cmd(Array1::zeros(3));
-
-    let ip_port = CIRCLE_HOST_IP_PORT.parse::<SocketAddrV4>().unwrap();
-    let mut sdk = ManiSdk::new(jnt_num, finger_dof_left, finger_dof_right);
-
-    let dt = 0.02;
+    let mut sdk = LoongManiSdk::default();
 
     let mut arm_cmd_data = array![
         [0.4, 0.4, 0.1, 0.0, 0.0, 0.0, 0.5],
         [0.2, -0.4, 0.1, 0.0, 0.0, 0.0, 0.5]
     ];
-    let mut finger_left_data = Array1::zeros(finger_dof_left as usize);
-    let mut finger_right_data = Array1::zeros(finger_dof_right as usize);
+    let mut finger_left_data = Array1::zeros(LOONG_FINGER_DOF_LEFT as usize);
+    let mut finger_right_data = Array1::zeros(LOONG_FINGER_DOF_RIGHT as usize);
 
+    let dt = 0.02;
     let mut ticker = interval(Duration::from_millis(20));
 
     for i in 0..1000 {
@@ -82,11 +45,11 @@ async fn main() {
         arm_cmd_data[[1, 0]] = 0.2 + 0.1 * (i as f64 * dt * 2.0).sin() as f32;
         finger_left_data[0] = 40.0 + 30.0 * (i as f64 * dt * 2.0).sin() as f32;
         finger_right_data[3] = 40.0 + 30.0 * (i as f64 * dt * 2.0).sin() as f32;
-        ctrl.set_arm_cmd(arm_cmd_data.clone())
+        sdk.ctrl_mut()
+            .set_arm_cmd(arm_cmd_data.clone())
             .set_finger_left(finger_left_data.clone())
             .set_finger_right(finger_right_data.clone());
-        sdk.send(&ctrl, ip_port).unwrap();
-        info!("send data: {}", ctrl);
+        sdk.send().unwrap();
         sdk.recv().unwrap();
         info!("{}", sdk.sens());
         ticker.tick().await;
