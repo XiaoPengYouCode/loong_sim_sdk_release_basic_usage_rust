@@ -1,14 +1,15 @@
-use tokio::time::{Duration, interval};
-use tracing::{Level, info};
-
 /// data: 2025.04.30
 /// author: XiaoPengYouCode.github.com
 use ndarray::prelude::*;
+use tokio::time::{Duration, interval};
+use tracing::{Level, info};
+
 use openloong_sdk_basic_usage_example_rust::{
     param::{LOONG_FINGER_DOF_LEFT, LOONG_FINGER_DOF_RIGHT},
     sdk::LoongManiSdk,
 };
 
+// use tokio interval to control the loop rate
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt()
@@ -24,7 +25,7 @@ async fn main() {
     let mut finger_right_data = Array1::zeros(LOONG_FINGER_DOF_RIGHT as usize);
 
     let dt = 0.02;
-    let mut ticker = interval(Duration::from_millis(20));
+    let mut ticker = interval(Duration::from_millis(20)); // use tokio interval to control the loop rate
 
     for i in 0..1000 {
         info!("frame count: {}", i);

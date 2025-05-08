@@ -55,6 +55,12 @@ impl LoongManiSdk {
     }
 }
 
+impl Default for LoongManiSdk {
+    fn default() -> Self {
+        Self::new(LOONG_JNT_NUM, LOONG_FINGER_DOF_LEFT, LOONG_FINGER_DOF_RIGHT)
+    }
+}
+
 impl LoongManiSdk {
     pub fn send(&self) -> Result<(), Error> {
         let data = self.ctrl.pack_data().unwrap();
@@ -68,7 +74,12 @@ impl LoongManiSdk {
         if let Ok((size, src_addr)) = self.socket.recv_from(&mut buf) {
             debug!("src_addr: {}", src_addr.to_string());
             debug!("Received data size: {}", size);
-            self.sens.unpack_data(&buf[..size]).unwrap();
+            match self.sens.unpack_data(&buf[..size]) {
+                Ok(_) => {}
+                Err(e) => {
+                    error!("Failed to unpack data: {}", e);
+                }
+            }
         } else {
             error!("Failed to receive data");
         };
@@ -99,23 +110,18 @@ impl LoongManiSdk {
             return Err("Invalid data length".into());
         }
         let mut arm_cmd_data = self.ctrl().arm_cmd().clone();
-        match arm_string {
-            "left" => {
-                for (i, item) in xyzrpy.iter().enumerate() {
-                    arm_cmd_data[[0, i]] = *item as f32
-                }
-                arm_cmd_data[[0, 6]] = 0.0;
-            }
-            "right" => {
-                for (i, item) in xyzrpy.iter().enumerate() {
-                    arm_cmd_data[[1, i]] = *item as f32
-                }
-                arm_cmd_data[[1, 6]] = 0.0;
-            }
+        let row = match arm_string {
+            "left" => 0_usize,
+            "right" => 1_usize,
             _ => {
+                error!("Invalid arm string");
                 return Err("Invalid arm string".into());
             }
+        };
+        for (i, item) in xyzrpy.iter().enumerate() {
+            arm_cmd_data[[row, i]] = *item as f32
         }
+        arm_cmd_data[[row, 6]] = 0.0;
         self.ctrl_mut().set_arm_cmd(arm_cmd_data);
         Ok(())
     }
@@ -130,32 +136,25 @@ impl LoongManiSdk {
             return Err("Invalid data length of finger".into());
         }
 
+        let finger_cmd_data = array![
+            finger[0] as f32,
+            finger[1] as f32,
+            finger[2] as f32,
+            finger[3] as f32,
+            finger[4] as f32,
+            finger[5] as f32,
+            0 as f32
+        ];
+
         match arm_string {
             "left" => {
-                let finger_cmd_data = array![
-                    finger[0] as f32,
-                    finger[1] as f32,
-                    finger[2] as f32,
-                    finger[3] as f32,
-                    finger[4] as f32,
-                    finger[5] as f32,
-                    0 as f32
-                ];
                 self.ctrl_mut().set_finger_left(finger_cmd_data);
             }
             "right" => {
-                let finger_cmd_data = array![
-                    finger[0] as f32,
-                    finger[1] as f32,
-                    finger[2] as f32,
-                    finger[3] as f32,
-                    finger[4] as f32,
-                    finger[5] as f32,
-                    0 as f32
-                ];
                 self.ctrl_mut().set_finger_right(finger_cmd_data);
             }
             _ => {
+                error!("Invalid arm string");
                 return Err("Invalid arm string".into());
             }
         }
@@ -168,10 +167,4 @@ fn init_mani_socket(socket_addr_port: SocketAddrV4) -> Result<UdpSocket, Error> 
     let socket = UdpSocket::bind(socket_addr_port)?;
     socket.set_nonblocking(true).unwrap();
     Ok(socket)
-}
-
-impl Default for LoongManiSdk {
-    fn default() -> Self {
-        Self::new(LOONG_JNT_NUM, LOONG_FINGER_DOF_LEFT, LOONG_FINGER_DOF_RIGHT)
-    }
 }

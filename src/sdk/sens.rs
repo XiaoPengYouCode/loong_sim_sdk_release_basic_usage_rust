@@ -206,7 +206,7 @@ impl SensData {
         for i in &mut act_j {
             *i = cursor.read_f32::<LittleEndian>()?;
         }
-        let act_j = Array1::from_iter(act_j.into_iter());
+        let act_j = Array1::from_iter(act_j);
         self.act_j = act_j;
 
         // 8. 解析 act_w
@@ -214,7 +214,7 @@ impl SensData {
         for i in &mut act_w {
             *i = cursor.read_f32::<LittleEndian>()?;
         }
-        let act_w = Array1::from_iter(act_w.into_iter());
+        let act_w = Array1::from_iter(act_w);
         self.act_w = act_w;
 
         // 9. 解析 act_t
@@ -222,7 +222,7 @@ impl SensData {
         for i in &mut act_t {
             *i = cursor.read_f32::<LittleEndian>()?;
         }
-        let act_t = Array1::from_iter(act_t.into_iter());
+        let act_t = Array1::from_iter(act_t);
         self.act_t = act_t;
 
         // 10. 解析 drv_temp
@@ -230,7 +230,7 @@ impl SensData {
         for i in &mut drv_temp {
             *i = cursor.read_i16::<LittleEndian>()?;
         }
-        let drv_temp = Array1::from_iter(drv_temp.into_iter());
+        let drv_temp = Array1::from_iter(drv_temp);
         self.drv_temp = drv_temp;
 
         // 11. 解析 drv_state
@@ -238,7 +238,7 @@ impl SensData {
         for i in &mut drv_state {
             *i = cursor.read_i16::<LittleEndian>()?;
         }
-        let drv_state = Array1::from_iter(drv_state.into_iter());
+        let drv_state = Array1::from_iter(drv_state);
         self.drv_state = drv_state;
 
         // 12. 解析 drv_err
@@ -246,7 +246,7 @@ impl SensData {
         for i in &mut drv_err {
             *i = cursor.read_i16::<LittleEndian>()?;
         }
-        let drv_err = Array1::from_iter(drv_err.into_iter());
+        let drv_err = Array1::from_iter(drv_err);
         self.drv_err = drv_err;
 
         // 13. 解析 tgt_j
@@ -254,7 +254,7 @@ impl SensData {
         for i in &mut tgt_j {
             *i = cursor.read_f32::<LittleEndian>()?;
         }
-        let tgt_j = Array1::from_iter(tgt_j.into_iter());
+        let tgt_j = Array1::from_iter(tgt_j);
         self.tgt_j = tgt_j;
 
         // 14. 解析 tgt_w
@@ -262,7 +262,7 @@ impl SensData {
         for i in &mut tgt_w {
             *i = cursor.read_f32::<LittleEndian>()?;
         }
-        let tgt_w = Array1::from_iter(tgt_w.into_iter());
+        let tgt_w = Array1::from_iter(tgt_w);
         self.tgt_w = tgt_w;
 
         // 15. 解析 tgt_t
@@ -270,7 +270,7 @@ impl SensData {
         for i in &mut tgt_t {
             *i = cursor.read_f32::<LittleEndian>()?;
         }
-        let tgt_t = Array1::from_iter(tgt_t.into_iter());
+        let tgt_t = Array1::from_iter(tgt_t);
         self.tgt_t = tgt_t;
 
         //解析 act_finger_left
@@ -278,7 +278,7 @@ impl SensData {
         for i in &mut act_finger_left {
             *i = cursor.read_f32::<LittleEndian>()?;
         }
-        let act_finger_left = Array1::from_iter(act_finger_left.into_iter());
+        let act_finger_left = Array1::from_iter(act_finger_left);
         self.act_finger_left = act_finger_left;
 
         //解析 act_finger_right
@@ -286,7 +286,7 @@ impl SensData {
         for i in &mut act_finger_right {
             *i = cursor.read_f32::<LittleEndian>()?;
         }
-        let act_finger_right = Array1::from_iter(act_finger_right.into_iter());
+        let act_finger_right = Array1::from_iter(act_finger_right);
         self.act_finger_right = act_finger_right;
 
         // 解析tgt_finger_left
@@ -294,7 +294,7 @@ impl SensData {
         for i in &mut tgt_finger_left {
             *i = cursor.read_f32::<LittleEndian>()?;
         }
-        let tgt_finger_left = Array1::from_iter(tgt_finger_left.into_iter());
+        let tgt_finger_left = Array1::from_iter(tgt_finger_left);
         self.tgt_finger_left = tgt_finger_left;
 
         // 解析tgt_finger_right
@@ -302,7 +302,7 @@ impl SensData {
         for i in &mut tgt_finger_right {
             *i = cursor.read_f32::<LittleEndian>()?;
         }
-        let tgt_finger_right = Array1::from_iter(tgt_finger_right.into_iter());
+        let tgt_finger_right = Array1::from_iter(tgt_finger_right);
         self.tgt_finger_right = tgt_finger_right;
 
         // 解析 act_tip_p_rpy2b
