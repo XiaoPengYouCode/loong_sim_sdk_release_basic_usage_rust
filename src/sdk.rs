@@ -123,6 +123,7 @@ impl LoongManiSdk {
         }
         arm_cmd_data[[row, 6]] = 0.0;
         self.ctrl_mut().set_arm_cmd(arm_cmd_data);
+        self.send()?;
         Ok(())
     }
 
@@ -158,6 +159,7 @@ impl LoongManiSdk {
                 return Err("Invalid arm string".into());
             }
         }
+        self.send()?;
         Ok(())
     }
 }
