@@ -5,7 +5,7 @@ use std::mem::size_of;
 use byteorder::{LittleEndian, ReadBytesExt};
 use ndarray::Array1;
 
-use crate::loong_robot_param::{LOONG_FINGER_DOF_LEFT, LOONG_FINGER_DOF_RIGHT, LOONG_JNT_NUM};
+use crate::param::{LOONG_FINGER_DOF_LEFT, LOONG_FINGER_DOF_RIGHT, LOONG_JNT_NUM};
 
 #[derive(Debug)]
 pub struct SensData {

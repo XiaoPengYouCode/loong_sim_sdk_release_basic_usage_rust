@@ -5,7 +5,7 @@ use tracing::{Level, info};
 /// author: XiaoPengYouCode.github.com
 use ndarray::prelude::*;
 use openloong_sdk_basic_usage_example_rust::{
-    loong_robot_param::{LOONG_FINGER_DOF_LEFT, LOONG_FINGER_DOF_RIGHT},
+    param::{LOONG_FINGER_DOF_LEFT, LOONG_FINGER_DOF_RIGHT},
     sdk::LoongManiSdk,
 };
 

@@ -3,7 +3,7 @@ use log::error;
 use ndarray::prelude::*;
 use std::io::Error;
 
-use crate::loong_robot_param::{
+use crate::param::{
     LOONG_ARM_DOF, LOONG_FINGER_DOF_LEFT, LOONG_FINGER_DOF_RIGHT, LOONG_LUMBAR_DOF, LOONG_NECK_DOF,
 };
 

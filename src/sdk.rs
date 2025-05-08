@@ -9,9 +9,7 @@ pub mod sens;
 
 use self::ctrl::CtrlData;
 use self::sens::SensData;
-use crate::loong_robot_param::{
-    LOONG_FINGER_DOF_LEFT, LOONG_FINGER_DOF_RIGHT, LOONG_JNT_NUM, TARGET_ADDR,
-};
+use crate::param::{LOONG_FINGER_DOF_LEFT, LOONG_FINGER_DOF_RIGHT, LOONG_JNT_NUM, TARGET_ADDR};
 
 pub struct LoongManiSdk {
     socket: UdpSocket,

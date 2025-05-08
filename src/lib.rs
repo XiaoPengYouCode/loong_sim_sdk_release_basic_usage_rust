@@ -1,4 +1,4 @@
-pub mod loong_robot_param;
+pub mod param;
 pub mod sdk;
 
 #[cfg(test)]
