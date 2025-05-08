@@ -75,7 +75,7 @@ pub struct CtrlData {
     finger_mode: FingerMode,
     neck_mode: NeckMode,
     lumbar_mode: LumbarMode,
-    pub arm_cmd: Array2<f32>,
+    arm_cmd: Array2<f32>,
     arm_fm: Array2<f32>,
     finger_left: Array1<f32>,
     finger_right: Array1<f32>,
@@ -149,6 +149,9 @@ impl CtrlData {
             .set_neck_cmd(Array1::zeros(2))
             .set_lumbar_cmd(Array1::zeros(3));
         default_loong_ctrl_data
+    }
+    pub fn arm_cmd(&self) -> Array2<f32> {
+        self.arm_cmd.clone()
     }
     pub fn set_in_charge(&mut self, in_charge: InCharge) -> &mut Self {
         self.in_charge = in_charge;

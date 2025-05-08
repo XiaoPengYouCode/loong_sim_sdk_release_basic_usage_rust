@@ -306,58 +306,46 @@ impl SensData {
         self.tgt_finger_right = tgt_finger_right;
 
         // 解析 act_tip_p_rpy2b
-        let mut act_tip_p_rpy2b = [[0.0; 6]; 2];
-        for i in 0..2 {
-            for j in 0..6 {
-                act_tip_p_rpy2b[i][j] = cursor.read_f32::<LittleEndian>()?;
+        for row in &mut self.act_tip_p_rpy2b {
+            for item in row {
+                *item = cursor.read_f32::<LittleEndian>()?;
             }
         }
-        self.act_tip_p_rpy2b = act_tip_p_rpy2b;
 
         // 解析 act_tip_vw2b
-        let mut act_tip_vw2b = [[0.0; 6]; 2];
-        for i in 0..2 {
-            for j in 0..6 {
-                act_tip_vw2b[i][j] = cursor.read_f32::<LittleEndian>()?;
+        for row in &mut self.act_tip_vw2b {
+            for item in row {
+                *item = cursor.read_f32::<LittleEndian>()?;
             }
         }
-        self.act_tip_vw2b = act_tip_vw2b;
 
         // 解析 act_tip_fm2b
-        let mut act_tip_fm2b = [[0.0; 6]; 2];
-        for i in 0..2 {
-            for j in 0..6 {
-                act_tip_fm2b[i][j] = cursor.read_f32::<LittleEndian>()?;
+        for row in &mut self.act_tip_fm2b {
+            for item in row {
+                *item = cursor.read_f32::<LittleEndian>()?;
             }
         }
-        self.act_tip_fm2b = act_tip_fm2b;
 
         // 解析 tgt_tip_p_rpy2b
-        let mut tgt_tip_p_rpy2b = [[0.0; 6]; 2];
-        for i in 0..2 {
-            for j in 0..6 {
-                tgt_tip_p_rpy2b[i][j] = cursor.read_f32::<LittleEndian>()?;
+        for row in &mut self.tgt_tip_p_rpy2b {
+            for item in row {
+                *item = cursor.read_f32::<LittleEndian>()?;
             }
         }
-        self.tgt_tip_p_rpy2b = tgt_tip_p_rpy2b;
 
         // 解析 tgt_tip_vw2b
-        let mut tgt_tip_vw2b = [[0.0; 6]; 2];
-        for i in 0..2 {
-            for j in 0..6 {
-                tgt_tip_vw2b[i][j] = cursor.read_f32::<LittleEndian>()?;
+        for row in &mut self.tgt_tip_vw2b {
+            for item in row {
+                *item = cursor.read_f32::<LittleEndian>()?;
             }
         }
-        self.tgt_tip_vw2b = tgt_tip_vw2b;
 
         // 解析tgt_tip_fm2b
-        let mut tgt_tip_fm2b = [[0.0; 6]; 2];
-        for i in 0..2 {
-            for j in 0..6 {
-                tgt_tip_fm2b[i][j] = cursor.read_f32::<LittleEndian>()?;
+        for row in &mut self.tgt_tip_fm2b {
+            for item in row {
+                *item = cursor.read_f32::<LittleEndian>()?;
             }
         }
-        self.tgt_tip_fm2b = tgt_tip_fm2b;
 
         Ok(())
     }

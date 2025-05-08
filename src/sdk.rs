@@ -1,19 +1,17 @@
-pub mod ctrl;
-pub mod sens;
-
+use ndarray::{Array1, array};
 use std::io::Error;
 use std::net::SocketAddrV4;
 use std::net::UdpSocket;
-
-use ndarray::{Array1, array};
 use tracing::{debug, error, info};
 
-use crate::loong_robot_param::{
-    LOONG_FINGER_DOF_LEFT, LOONG_FINGER_DOF_RIGHT, LOONG_JNT_NUM, TARGET_ADDR,
-};
+pub mod ctrl;
+pub mod sens;
 
 use self::ctrl::CtrlData;
 use self::sens::SensData;
+use crate::loong_robot_param::{
+    LOONG_FINGER_DOF_LEFT, LOONG_FINGER_DOF_RIGHT, LOONG_JNT_NUM, TARGET_ADDR,
+};
 
 pub struct LoongManiSdk {
     socket: UdpSocket,
@@ -102,27 +100,62 @@ impl LoongManiSdk {
         if xyzrpy.len() != 6 {
             return Err("Invalid data length".into());
         }
-        let mut arm_cmd_data = self.ctrl().arm_cmd.clone();
+        let mut arm_cmd_data = self.ctrl().arm_cmd().clone();
         match arm_string {
             "left" => {
-                arm_cmd_data[[0, 0]] = xyzrpy[0] as f32;
-                arm_cmd_data[[0, 1]] = xyzrpy[1] as f32;
-                arm_cmd_data[[0, 2]] = xyzrpy[2] as f32;
-                arm_cmd_data[[0, 3]] = xyzrpy[3] as f32;
-                arm_cmd_data[[0, 4]] = xyzrpy[4] as f32;
-                arm_cmd_data[[0, 5]] = xyzrpy[5] as f32;
+                for (i, item) in xyzrpy.iter().enumerate() {
+                    arm_cmd_data[[0, i]] = *item as f32
+                }
                 arm_cmd_data[[0, 6]] = 0.0;
-                self.ctrl_mut().set_arm_cmd(arm_cmd_data);
             }
             "right" => {
-                arm_cmd_data[[1, 0]] = xyzrpy[0] as f32;
-                arm_cmd_data[[1, 1]] = xyzrpy[1] as f32;
-                arm_cmd_data[[1, 2]] = xyzrpy[2] as f32;
-                arm_cmd_data[[1, 3]] = xyzrpy[3] as f32;
-                arm_cmd_data[[1, 4]] = xyzrpy[4] as f32;
-                arm_cmd_data[[1, 5]] = xyzrpy[5] as f32;
+                for (i, item) in xyzrpy.iter().enumerate() {
+                    arm_cmd_data[[1, i]] = *item as f32
+                }
                 arm_cmd_data[[1, 6]] = 0.0;
-                self.ctrl_mut().set_arm_cmd(arm_cmd_data);
+            }
+            _ => {
+                return Err("Invalid arm string".into());
+            }
+        }
+        self.ctrl_mut().set_arm_cmd(arm_cmd_data);
+        Ok(())
+    }
+
+    pub fn handle_finger(
+        &mut self,
+        arm_string: &str,
+        finger: &[f64],
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        if finger.len() != LOONG_FINGER_DOF_LEFT as usize {
+            error!("Invalid data length of finger");
+            return Err("Invalid data length of finger".into());
+        }
+
+        match arm_string {
+            "left" => {
+                let finger_cmd_data = array![
+                    finger[0] as f32,
+                    finger[1] as f32,
+                    finger[2] as f32,
+                    finger[3] as f32,
+                    finger[4] as f32,
+                    finger[5] as f32,
+                    0 as f32
+                ];
+                self.ctrl_mut().set_finger_left(finger_cmd_data);
+            }
+            "right" => {
+                let finger_cmd_data = array![
+                    finger[0] as f32,
+                    finger[1] as f32,
+                    finger[2] as f32,
+                    finger[3] as f32,
+                    finger[4] as f32,
+                    finger[5] as f32,
+                    0 as f32
+                ];
+                self.ctrl_mut().set_finger_right(finger_cmd_data);
             }
             _ => {
                 return Err("Invalid arm string".into());
