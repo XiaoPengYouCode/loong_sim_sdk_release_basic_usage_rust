@@ -1,0 +1,10 @@
+jnt_num = 19         #
+arm_dof = 7          #
+finger_dof_left = 6  # [6]6dof灵巧手 [1]夹爪
+finger_dof_right = 6 # [6]6dof灵巧手 [1]夹爪
+neck_dof = 2         #
+lumbar_dof = 3       #
+
+# sim "0.0.0.0:8003"
+# real "192.168.1.201:8003"
+target_addr = "0.0.0.0:8003"
